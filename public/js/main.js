@@ -1,8 +1,42 @@
 $(document).ready(function() {
     
     
+        
+    //$.cookie('player','sooka',{path:'/'});        
+        // отправить сообщение из формы publish
+        $('#publish').submit(function(event) {
+            event.preventDefault();
+            let outgoingMessage = this.message.value;
+        
+            socket_chat.send(outgoingMessage);
+            
+        });
+        
+        
+        
+        
     
 });
+
+let socket_chat = new WebSocket("ws://localhost:8000/test/");
+// обработчик входящих сообщений
+socket_chat.onmessage = function(event) {
+    let incomingMessage = event.data;
+    showMessage(incomingMessage);
+};
+
+// показать сообщение в div#subscribe
+function showMessage(message) {
+    $('div#subscribe').append(`<p>${decodeURIComponent(message)}</p>`);
+    
+}
+//======= чат ===================
+
+
+//======= чат ===================
+
+
+
 var game = new Phaser.Game(800, 800, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
 //var address = "ws://localhost:8000/game/";//"ws://diamant-s.ru:8000/game/"
 //var socket = new WebSocket(address);
@@ -68,7 +102,7 @@ function create() {
     Phaser.Keyboard.UP,
     Phaser.Keyboard.DOWN,
     Phaser.Keyboard.SPACEBAR
-]);
+   ]);
 }
 
 function update() {

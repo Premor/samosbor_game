@@ -25,18 +25,19 @@ function view_page(path) {
 }
 function test(){
 	this.on('open',(client)=>{
-		console.log(client)
-		F.global.online_users.concat(client)
-		this.send(`Приветствуем ${client.id}`);
+		const login = client.cookie('player');
+		console.log(client);
+		client.user = {name:login};
+		this.send(`Приветствуем ${client.user.name}`,null,[client.id]);
 		client.send('вы подключены')
 	})
 	this.on('close',(client)=>{
-		offline_user(client.id);
-		this.send(`${client.id} покинул нас`);
+		//offline_user(client.id);
+		this.send(`${client.user.name} покинул нас`,null,[client.id]);
 	})
 	this.on('message',(client,message)=>{
 
-		this.send(`${message}`);
+		this.send(`${client.user.name}: ${message}`);
 	})
 	
 }
@@ -61,11 +62,11 @@ function test2(){
 		
 	})
 	this.on('close',(client)=>{
-		/*offline_user(client.id);
-		this.send(`${client.id} покинул нас`);*/
+		//offline_user(client.id);
+		this.send(`${client.id} покинул нас`,null,[client.id]);
 	})
 	this.on('message',(client,message)=>{
-		console.log(`${client.id}:last message ${client.cookie.player}`)
+		//console.log(`${client.id}:last message ${client.cookie.player}`)
 		client.cookie.player = message;
 		this.send(`${message}`);
 	})
