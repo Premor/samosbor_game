@@ -7,7 +7,7 @@ $(document).ready(function() {
         $('#publish').submit(function(event) {
             event.preventDefault();
             let outgoingMessage = this.message.value;
-        
+            this.reset();
             socket_chat.send(outgoingMessage);
             
         });
