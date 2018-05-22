@@ -10,7 +10,14 @@ function game() {
 	//const self = this;
     this.on('open',(client)=>{
 		client.user = {x:200,speed:4};
+		let list_online_id=[];
 		this.send(`new player;${client.id}`,null,[client.id]);
+		for (i in this.connections){
+			if (i!=client.id){
+				list_online_id.push(i);
+			}
+		}
+		client.send(`all players;${list_online_id.join(',')}`)
 		//if (this.online)
 		/*const login = client.cookie('player');
 		MODEL('user').person_f(login,(err,res)=>{
@@ -33,21 +40,22 @@ function game() {
 			}
 		})*/
 	})
-	/*
+	
 	this.on('close',(client)=>{
-		
+		this.send(`remove player;${client.id}`,null,[client.id]);
+		/*
 		const login = client.cookie('player');
 		if (!client.user.timer_store){
 			MODEL('user').person_m(login,client.user);
 		}
 		F.global.users_id[client.user.name]=null;
-		
-	})*/
+		*/
+	})
 	this.on('message',(client,message)=>{
 
 		let res = '';
 		const mes = message.split(';');
-		console.log(`mes: 	${mes}`)
+		//console.log(`mes: 	${mes}`)
 		switch (mes[0]){
 			case 'move': 
 				if (mes[1]=='right'){
@@ -66,7 +74,7 @@ function game() {
 				this.send(`another move;${client.id},${client.user.x}`,null,[client.id]);
 				break;
 		}
-		console.log(`res: ${res}`);
+		//console.log(`res: ${res}`);
 		client.send(res);
 	});
 			/*case 'lvl_up':client.user = MODEL('game').lvl_up(client.user);res = `lvl_up;${JSON.stringify(client.user)}`; break;

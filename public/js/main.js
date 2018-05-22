@@ -17,8 +17,10 @@ $(document).ready(function() {
         
     
 });
+const address = 'localhost';
+// const address = 'diamant-s.ru';
 let another_players = [];
-let socket_chat = new WebSocket("ws://localhost:8000/chat/");
+let socket_chat = new WebSocket(`ws://${address}:8000/chat/`);
 // обработчик входящих сообщений
 socket_chat.onmessage = function(event) {
     let incomingMessage = event.data;
@@ -38,9 +40,7 @@ function showMessage(message) {
 
 
 var game = new Phaser.Game(800, 800, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
-var address = "ws://localhost:8000/game/";//"ws://diamant-s.ru:8000/game/"
-var socket = new WebSocket(address);
-//= make_new_player('Test');
+var socket ;
 var player;
 var speed = 4;
 /*socket.onopen = function() {
@@ -75,8 +75,8 @@ function create_idle_screen(){
 function create() {
     player = this.add.sprite(200,200,'cobra');
     player.anchor.setTo(0.5,0.5);    
-    
-
+    socket= new WebSocket(`ws://${address}:8000/game/`);
+    create_handler();
     /*
     ibutton1 = this.add.button(this.world.centerX + 195, 100, 'button1', actionOnClick, this);
     ibutton2 = this.add.button(this.world.centerX + 195, 200, 'button2', level_up, this);
@@ -111,29 +111,46 @@ function update() {
         }
     }
 }
-
-socket.onmessage = (event)=>{
-    let mes = decodeURIComponent(event.data).split(';');console.log(mes);
-    switch (mes[0]){
-        case 'new player':create_new_player(mes[1]);break;
-        case 'another move':another_move(mes[1].split(','));break;
-        //case 'move':mes[1]!='err'?console.log(`server: ${mes[1]}`):console.log('move err');
-        //////
-        case 'player':player = JSON.parse(mes[1]);need_update = true;break;
-        case 'store_en': player.current_energy = parseFloat(mes[1]);need_update = true;break;
-        case 'lvl_up': player = JSON.parse(mes[1]);need_update = true;break;
-        case 'list_online':online(mes[1].split('`'));break;
-        case 'fight':{let buf = JSON.parse(mes[1]);mode = 'fight';opp = buf;need_update = true; create_fight_screen();break;}
-        case 'you_turn':{let buf = JSON.parse(mes[1]);player = buf;need_update = true;show_damage_button(); break;}
-        case 'opp_turn':{let buf = JSON.parse(mes[1]);opp = buf;need_update = true;hide_damage_button(); break;}
-        case 'win':player = JSON.parse(mes[1]);mode = 'idle';create_idle_screen(); need_update = true;break;
-        case 'lose':player = JSON.parse(mes[1]);mode = 'idle';create_idle_screen();need_update = true;break;
+function create_handler(){
+    socket.onmessage = (event)=>{
+        let mes = decodeURIComponent(event.data).split(';');console.log(mes);
+        switch (mes[0]){
+            case 'new player':create_new_player(mes[1]);break;
+            case 'another move':another_move(mes[1].split(','));break;
+            case 'all players':create_current_players(mes[1].split(','));break;
+            case 'remove player':remove_player(mes[1]);break;
+            //case 'move':mes[1]!='err'?console.log(`server: ${mes[1]}`):console.log('move err');
+            //////
+            case 'player':player = JSON.parse(mes[1]);need_update = true;break;
+            case 'store_en': player.current_energy = parseFloat(mes[1]);need_update = true;break;
+            case 'lvl_up': player = JSON.parse(mes[1]);need_update = true;break;
+            case 'list_online':online(mes[1].split('`'));break;
+            case 'fight':{let buf = JSON.parse(mes[1]);mode = 'fight';opp = buf;need_update = true; create_fight_screen();break;}
+            case 'you_turn':{let buf = JSON.parse(mes[1]);player = buf;need_update = true;show_damage_button(); break;}
+            case 'opp_turn':{let buf = JSON.parse(mes[1]);opp = buf;need_update = true;hide_damage_button(); break;}
+            case 'win':player = JSON.parse(mes[1]);mode = 'idle';create_idle_screen(); need_update = true;break;
+            case 'lose':player = JSON.parse(mes[1]);mode = 'idle';create_idle_screen();need_update = true;break;
+        }
+    };
+}
+function create_current_players(args){
+    if (args == '') return false;
+    for (i of args){
+        console.log(i);
+        another_players.push({player:game.add.sprite(200,200,'cobra'),id:i,move_x:null})    
+        another_players[another_players.length-1].player.anchor.setTo(0.5,0.5);
     }
-};
+    console.log('pidor  '+another_players);
+}
 
+function remove_player(_id){
+    const finder_id = another_players.findIndex((ell)=>{return ell.id == _id});
+    another_players[finder_id].player.destroy(true);
+    another_players.splice(finder_id,1);
+}
 
 function create_new_player(_id){
-    another_players =another_players.concat({player:game.add.sprite(200,200,'cobra'),id:_id,move_x:null});
+    another_players.push({player:game.add.sprite(200,200,'cobra'),id:_id,move_x:null});
     another_players[another_players.length-1].player.anchor.setTo(0.5,0.5);    
   
 }
@@ -141,13 +158,9 @@ function create_new_player(_id){
 function another_move(args){
     const id = args[0];
     const x = parseInt(args[1]);
-    console.log(`id: ${id}`);
-    console.log(`x: ${x}`);
-    const finder_id = another_players.findIndex((ell)=>{return ell.id == id})
-    console.log(`f_id: ${finder_id}`)
+    const finder_id = another_players.findIndex((ell)=>{return ell.id == id});
     if (finder_id!=(-1)) another_players[finder_id].move_x = x;
-    console.log(`flag: ${another_players[finder_id].move_x}`);
-
+    
 }
 
 function online(arg){
