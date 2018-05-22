@@ -89,7 +89,7 @@ function create() {
     Phaser.Keyboard.RIGHT,
     Phaser.Keyboard.UP,
     Phaser.Keyboard.DOWN,
-    Phaser.Keyboard.SPACEBAR
+    //Phaser.Keyboard.SPACEBAR
    ]);
 }
 function update() {
