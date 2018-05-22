@@ -5,9 +5,6 @@ exports.install = function() {
 	F.route('/',home,['#session'])
 	F.route('/',create_person,['post','#session'])
 	F.route('/{path}/', view_page,['#session']);
-	F.websocket('/chat/',chat);
-	F.websocket('/test2/',test2,['#session']);
-	F.global.online_users = [];
 };
 
 
@@ -23,55 +20,7 @@ function view_page(path) {
 	{this.redirect('/game/')}
 	this.view(path);
 }
-function chat(){
-	this.on('open',(client)=>{
-		const login = client.cookie('player');
-		
-		client.user = {name:login};
-		this.send(`Приветствуем ${client.user.name}`,null,[client.id]);
-		client.send('вы подключены')
-	})
-	this.on('close',(client)=>{
-		//offline_user(client.id);
-		this.send(`${client.user.name} покинул нас`,null,[client.id]);
-	})
-	this.on('message',(client,message)=>{
 
-		this.send(`${client.user.name}: ${message}`);
-	})
-	
-}
-
-function test2(){
-	this.on('open',(client)=>{
-		
-		const login = client.cookie('player');
-		MODEL('user').person_f(login,(err,res)=>{
-			if (err){
-				client.send(`err;${err}`)
-			}	
-			else{
-				let buf= res.person;
-				if (res.person == ''){
-					buf = MODEL('game').make_player('Broly');
-					MODEL('user').person_m(login,buf)
-				}
-				client.send(`персонаж: ${JSON.stringify(buf)}`)
-			}
-		})
-		
-	})
-	this.on('close',(client)=>{
-		//offline_user(client.id);
-		this.send(`${client.id} покинул нас`,null,[client.id]);
-	})
-	this.on('message',(client,message)=>{
-		//console.log(`${client.id}:last message ${client.cookie.player}`)
-		client.cookie.player = message;
-		this.send(`${message}`);
-	})
-	
-}
 
 function create_person(){
 	const login = this.cookie('player');
@@ -90,17 +39,6 @@ function create_person(){
 
 }
 
-
-function offline_user(id){
-	let buf=0;
-	for (i of F.global.online_users){
-		if (i.id == id){
-			break;
-		}
-		buf++;
-	}
-	F.global.online_users.splice(buf,1)
-}
 
 
 function logout(){
@@ -125,11 +63,6 @@ function login(){
 
 function json_create_user() {
 	var user = { id: Utils.GUID(5), login: this.body.login, password: this.body.psw };
-	
-
-	//console.log(this.flags)
-	//console.log(this.body)
-    // global alias:
     MODEL('user').create(user);
     this.redirect('/');
 }

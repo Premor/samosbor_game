@@ -17,10 +17,10 @@ $(document).ready(function() {
         
     
 });
-const address = 'localhost';
-// const address = 'diamant-s.ru';
+const address = 'localhost:8001';
+// const address = 'diamant-s.ru:8001';
 let another_players = [];
-let socket_chat = new WebSocket(`ws://${address}:8000/chat/`);
+let socket_chat = new WebSocket(`ws://${address}/chat/`);
 // обработчик входящих сообщений
 socket_chat.onmessage = function(event) {
     let incomingMessage = event.data;
@@ -75,7 +75,7 @@ function create_idle_screen(){
 function create() {
     player = this.add.sprite(200,200,'cobra');
     player.anchor.setTo(0.5,0.5);    
-    socket= new WebSocket(`ws://${address}:8000/game/`);
+    socket= new WebSocket(`ws://${address}/game/`);
     create_handler();
     /*
     ibutton1 = this.add.button(this.world.centerX + 195, 100, 'button1', actionOnClick, this);
