@@ -5,7 +5,7 @@ exports.install = function() {
 	F.route('/',home,['#session'])
 	F.route('/',create_person,['post','#session'])
 	F.route('/{path}/', view_page,['#session']);
-	F.websocket('/test/',test);
+	F.websocket('/chat/',chat);
 	F.websocket('/test2/',test2,['#session']);
 	F.global.online_users = [];
 };
@@ -23,10 +23,10 @@ function view_page(path) {
 	{this.redirect('/game/')}
 	this.view(path);
 }
-function test(){
+function chat(){
 	this.on('open',(client)=>{
 		const login = client.cookie('player');
-		console.log(client);
+		
 		client.user = {name:login};
 		this.send(`Приветствуем ${client.user.name}`,null,[client.id]);
 		client.send('вы подключены')

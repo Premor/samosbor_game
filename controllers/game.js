@@ -7,9 +7,12 @@ exports.install = function() {
 };
 
 function game() {
-	const self = this;
+	//const self = this;
     this.on('open',(client)=>{
-		const login = client.cookie('player');
+		client.user = {x:200,speed:4};
+		this.send(`new player;${client.id}`,null,[client.id]);
+		//if (this.online)
+		/*const login = client.cookie('player');
 		MODEL('user').person_f(login,(err,res)=>{
 			if (err){
 				client.send(`err;${err}`)
@@ -28,8 +31,9 @@ function game() {
 				}
 				
 			}
-		})
+		})*/
 	})
+	/*
 	this.on('close',(client)=>{
 		
 		const login = client.cookie('player');
@@ -38,14 +42,34 @@ function game() {
 		}
 		F.global.users_id[client.user.name]=null;
 		
-	})
+	})*/
 	this.on('message',(client,message)=>{
 
 		let res = '';
 		const mes = message.split(';');
 		console.log(`mes: 	${mes}`)
 		switch (mes[0]){
-			case 'lvl_up':client.user = MODEL('game').lvl_up(client.user);res = `lvl_up;${JSON.stringify(client.user)}`; break;
+			case 'move': 
+				if (mes[1]=='right'){
+					client.user.x +=client.user.speed;
+					
+				} 
+				else if (mes[1]=='left'){
+					client.user.x -=client.user.speed;
+
+				}  
+				else {
+					res = `${mes[0]};err`;
+					break;
+				}
+				res = `${mes[0]};${client.user.x}`;
+				this.send(`another move;${client.id},${client.user.x}`,null,[client.id]);
+				break;
+		}
+		console.log(`res: ${res}`);
+		client.send(res);
+	});
+			/*case 'lvl_up':client.user = MODEL('game').lvl_up(client.user);res = `lvl_up;${JSON.stringify(client.user)}`; break;
             case 'store_en':if (client.user.timer_store) {res = `already`}else {client.user.timer_store = setTimeout((args)=>{
 				const id = args[0];
 				const login = args[1];
@@ -73,7 +97,7 @@ function game() {
 						}
 					});	
 				}						
-				},10000,[client.id,client.cookie('player')]);  /*place.energy*player_talant*/; res = `store_en;${client.user.current_energy}`;}break;
+				},10000,[client.id,client.cookie('player')]);  /*place.energy*player_talant; res = `store_en;${client.user.current_energy}`;}break;
             case 'list_online': {let buf = []; for(i in F.global.users_id){buf = buf.concat(i)};res = `list_online;${buf.join('`')}`;break;}//`list_online;${this.connections}`
 			case 'fight':{let buf = this.find(F.global.users_id[mes[1]]);this.send(`fight;${JSON.stringify(client.user)}`,[F.global.users_id[mes[1]]]);res = `fight;${JSON.stringify(buf.user)}`;client.user.id_opp = F.global.users_id[mes[1]];buf.user.id_opp = client.id;client.user.mode = 'attack';buf.user.mode = 'defense';break;}
 			case 'attack':if (client.user.mode == 'attack'){
@@ -98,5 +122,5 @@ function game() {
         }
         console.log(`res: ${res}`);
 		client.send(res);
-	})
+	})*/
 }
