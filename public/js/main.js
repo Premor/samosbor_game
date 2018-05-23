@@ -57,6 +57,7 @@ function preload() {
     this.load.image('button2','/img/small/Прорыв.png');
     this.load.image('fight_screen','/img/fight.jpg');*/
     this.load.image('cobra','/img/cobra.gif')
+    this.load.spritesheet('goku','/img/goku.png',37,46)
     
     
     
@@ -73,10 +74,16 @@ function create_idle_screen(){
 }
 
 function create() {
-    player = this.add.sprite(200,200,'cobra');
+    player = this.add.sprite(200,200,'goku');
     player.anchor.setTo(0.5,0.5);    
     socket= new WebSocket(`ws://${address}/game/`);
     create_handler();
+
+
+    player.frame = 5;
+    player.animations.add('test',[6,7,8,9,10,11],10,true);
+    player.animations.add('idle',[0,1,2,3,4,5],10,true);
+    
     /*
     ibutton1 = this.add.button(this.world.centerX + 195, 100, 'button1', actionOnClick, this);
     ibutton2 = this.add.button(this.world.centerX + 195, 200, 'button2', level_up, this);
@@ -84,25 +91,19 @@ function create() {
     textTable.energy = this.add.text(256, 16, `Кол-во духовной энергии: 2/3`, {  font: 'Arkhip',fontSize: '16px', fill: 'green' });
     textTable.level_up = this.add.text(616, 16, 'Не хватает энергии для прорыва', {  font: 'Arkhip',fontSize: '16px', fill: 'red' });
     */
-   game.input.keyboard.addKeyCapture([
-    Phaser.Keyboard.LEFT,
-    Phaser.Keyboard.RIGHT,
-    Phaser.Keyboard.UP,
-    Phaser.Keyboard.DOWN,
-    //Phaser.Keyboard.SPACEBAR
-   ]);
+    
+    player.animations.play('test');
+    
+
+    game.input.keyboard.addKeyCapture([
+        Phaser.Keyboard.LEFT,
+        Phaser.Keyboard.RIGHT,
+        Phaser.Keyboard.UP,
+        Phaser.Keyboard.DOWN,
+        //Phaser.Keyboard.SPACEBAR
+    ]);
 }
 function update() {
-    if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
-    {
-        player.x -= speed;
-        socket.send('move;left');
-    }
-    else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
-    {
-        player.x += speed;
-        socket.send('move;right');
-    }
     for (a of another_players){
         
         if (a.move_x){
@@ -110,6 +111,28 @@ function update() {
             a.move_x = null; 
         }
     }
+    if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
+    {
+        if (player.animations.currentAnim.name != 'test'){
+            player.animations.play('test');
+        }
+        player.x -= speed;
+        socket.send('move;left');
+    }
+    else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
+    {
+        if (player.animations.currentAnim.name != 'test'){
+            player.animations.play('test');
+        }
+        player.x += speed;
+        socket.send('move;right');
+    }
+    else{
+        if (player.animations.currentAnim.name != 'idle'){
+            player.animations.play('idle');
+        }
+    }
+    
 }
 function create_handler(){
     socket.onmessage = (event)=>{
