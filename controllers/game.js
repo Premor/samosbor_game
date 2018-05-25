@@ -9,15 +9,27 @@ exports.install = function() {
 function game() {
 	//const self = this;
     this.on('open',(client)=>{
+		const login = client.cookie('player');
+		const password = client.cookie('password');
+		const char = client.cookie('char');
 		client.user = {x:200,speed:4};
 		let list_online_id=[];
-		this.send(`new player;${client.id}`,null,[client.id]);
-		for (i in this.connections){
-			if (i!=client.id){
-				list_online_id.push(i);
+		MODEL('user').login_u(login,password,(err,res)=>{
+			if (err){
+				this.send('gavno');
 			}
-		}
-		client.send(`all players;${list_online_id.join(',')}`)
+			else{
+				client.user.type = res.characters[char];
+				this.send(`new player;${client.id};${client.user.type}`,null,[client.id]);
+				for (i in this.connections){
+					if (i!=client.id){
+						list_online_id.push(i);
+					}
+				}
+				client.send(`all players;${list_online_id.join(',')}`);
+		
+			}
+		})
 		//if (this.online)
 		/*const login = client.cookie('player');
 		MODEL('user').person_f(login,(err,res)=>{

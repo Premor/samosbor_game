@@ -13,14 +13,18 @@ exports.load = (id, callback) => {
     NOSQL('users').one().where('id', id).callback(callback);
 }
 
-exports.find_u = (login, psw, callback) => {
-    NOSQL('users').one().where('login', login).where('password', psw).callback(callback);
+exports.login_u = (login,psw,callback)=>{
+    NOSQL('users').one().where('login', login).where('password',psw).callback(callback);
+}
+
+exports.find_u = (login, callback) => {
+    NOSQL('users').one().where('login', login).callback(callback);
 }
 
 exports.person_f = (login,callback) => {
     NOSQL('users').one().where('login', login).fields('person').callback(callback);
 }
 
-exports.person_m = (login,person) => {
-    NOSQL('users').modify({'person':person}).where('login', login);
+exports.char_m = (login,char,callback) => {
+    NOSQL('users').modify({'characters':char}).where('login', login).callback(callback);
 }
