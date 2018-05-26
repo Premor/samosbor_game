@@ -90,13 +90,7 @@ function create() {
     // player.animations.add('test',[6,7,8,9,10,11],10,true);
     // player.animations.add('idle',[0,1,2,3,4,5],10,true);
     
-    /*
-    ibutton1 = this.add.button(this.world.centerX + 195, 100, 'button1', actionOnClick, this);
-    ibutton2 = this.add.button(this.world.centerX + 195, 200, 'button2', level_up, this);
-    textTable.level_name = this.add.text(16, 16, `Вы в Духовная сфера`, { font: 'Arkhip',fontSize: '16px', fill: 'white' });
-    textTable.energy = this.add.text(256, 16, `Кол-во духовной энергии: 2/3`, {  font: 'Arkhip',fontSize: '16px', fill: 'green' });
-    textTable.level_up = this.add.text(616, 16, 'Не хватает энергии для прорыва', {  font: 'Arkhip',fontSize: '16px', fill: 'red' });
-    */
+   
     
     //player.animations.play('test');
     
