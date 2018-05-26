@@ -14,20 +14,22 @@ function game() {
 		const char = client.cookie('char');
 		client.user = {x:200,speed:4};
 		let list_online_id=[];
+		let list_types = [];
 		MODEL('user').login_u(login,password,(err,res)=>{
 			if (err){
 				this.send('gavno');
 			}
 			else{
-				client.user.type = res.characters[char];
+				client.user.type = res.characters[char].type;
 				this.send(`new player;${client.id};${client.user.type}`,null,[client.id]);
-				client.send(`player;${client.user.type}`)
+				client.send(`player;${client.user.type}`);
 				for (i in this.connections){
 					if (i!=client.id){
 						list_online_id.push(i);
+						list_types.push(this.connections[i].req.user.type);
 					}
 				}
-				client.send(`all players;${list_online_id.join(',')}`);
+				client.send(`all players;${list_online_id.join(',')};${list_types.join(',')}`);
 		
 			}
 		})

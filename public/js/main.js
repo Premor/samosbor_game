@@ -43,11 +43,12 @@ function showMessage(message) {
 //======= чат ===================
 
 
-
-var game = new Phaser.Game(800, 800, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
 var socket ;
 var player;
 var speed = 4;
+let load = false;
+var game = new Phaser.Game(800, 800, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
+
 /*socket.onopen = function() {
     socket.send('load_player');
     //socket.send('list_online');
@@ -109,7 +110,8 @@ function create() {
     ]);
 }
 function update() {
-    for (a of another_players){
+    if (load){
+        for (a of another_players){
         
         if (a.move_x){
             a.player.x = a.move_x;
@@ -118,35 +120,35 @@ function update() {
     }
     if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
     {
-        if (player.animations.currentAnim.name != 'test'){
-            player.animations.play('test');
-        }
+        //if (player.animations.currentAnim.name != 'test'){
+        //    player.animations.play('test');
+        //}
         player.x -= speed;
         socket.send('move;left');
     }
     else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
     {
-        if (player.animations.currentAnim.name != 'test'){
-            player.animations.play('test');
-        }
+        //if (player.animations.currentAnim.name != 'test'){
+        //    player.animations.play('test');
+        //}
         player.x += speed;
         socket.send('move;right');
     }
     else{
-        if (player.animations.currentAnim.name != 'idle'){
-            player.animations.play('idle');
-        }
+        //if (player.animations.currentAnim.name != 'idle'){
+        //    player.animations.play('idle');
+        //}
     }
-    
+    }
 }
 
 function create_handler(){
     socket.onmessage = (event)=>{
         let mes = decodeURIComponent(event.data).split(';');console.log(mes);
         switch (mes[0]){
-            case 'new player':create_new_player(mes[1]);break;
+            case 'new player':create_new_player(mes[1],mes[2]);break;
             case 'another move':another_move(mes[1].split(','));break;
-            case 'all players':create_current_players(mes[1].split(','));break;
+            case 'all players':create_current_players(mes[1].split(','),mes[2].split(','));break;
             case 'remove player':remove_player(mes[1]);break;
             case 'player':create_player(mes[1]);
             //case 'move':mes[1]!='err'?console.log(`server: ${mes[1]}`):console.log('move err');
@@ -165,31 +167,53 @@ function create_handler(){
     };
 }
 
-function create_player(arg){
+function create_player(type){
     let sprite = '';
-    switch(arg){
-        case 'нормальный': sprite = 'cobra';
+    switch(type){
+        case 'обычный': sprite = 'cobra';break;
                 
-        case 'ученый': sprite = 'goku';
-        default:sprite = 'cobra';
+        case 'ученый': sprite = 'goku';break;
+        default:sprite = 'cobra';break;
     }
-    player = this.add.sprite(200,200,sprite);
+    player = game.add.sprite(200,200,sprite);
     player.anchor.setTo(0.5,0.5);
+    switch(sprite){
+        case 'cobra':break;
+                
+        case 'goku': {
     player.frame = 5;
+    
     player.animations.add('test',[6,7,8,9,10,11],10,true);
     player.animations.add('idle',[0,1,2,3,4,5],10,true);
-    player.animations.play('test');
+    player.animations.play('idle');
+    break;}
     
+    }
+    load = true;
 }
 
-function create_current_players(args){
-    if (args == '') return false;
-    for (i of args){
-        console.log(i);
-        another_players.push({player:game.add.sprite(200,200,'cobra'),id:i,move_x:null})    
-        another_players[another_players.length-1].player.anchor.setTo(0.5,0.5);
+function make_another_player_model(type){
+    let ret = {};
+    switch(type){
+        case 'обычный': sprite = 'cobra';break;
+                
+        case 'ученый': sprite = 'goku';break;
+        default:sprite = 'cobra';break;
     }
-    console.log('pidor  '+another_players);
+    ret = game.add.sprite(200,200,sprite);
+    ret.anchor.setTo(0.5,0.5);
+    //player.animations.add('test',[6,7,8,9,10,11],10,true);
+    //player.animations.add('idle',[0,1,2,3,4,5],10,true);
+    return ret;
+}
+
+function create_current_players(args,types){
+    if (args == '') return false;
+    for (let i=0,buf = {};i<args.length;i++){
+        buf = make_another_player_model(types[i]);
+        another_players.push({player:buf,id:args[i],move_x:null,type:types[i]});    
+    }
+    
 }
 
 function remove_player(_id){
@@ -198,10 +222,10 @@ function remove_player(_id){
     another_players.splice(finder_id,1);
 }
 
-function create_new_player(_id){
-    another_players.push({player:game.add.sprite(200,200,'cobra'),id:_id,move_x:null});
-    another_players[another_players.length-1].player.anchor.setTo(0.5,0.5);    
-  
+function create_new_player(_id,_type){
+    const buf = make_another_player_model(types[i]);
+    another_players.push({player:buf,id:_id,move_x:null,type:_type});
+   
 }
 
 function another_move(args){
