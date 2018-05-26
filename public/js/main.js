@@ -17,6 +17,11 @@ $(document).ready(function() {
         
     
 });
+/*class Player{
+    phaser_object;
+    type
+}*/
+
 const address = 'localhost:8001';
 // const address = 'diamant-s.ru:8001';
 let another_players = [];
@@ -74,15 +79,15 @@ function create_idle_screen(){
 }
 
 function create() {
-    player = this.add.sprite(200,200,'goku');
-    player.anchor.setTo(0.5,0.5);    
+    //player = this.add.sprite(200,200,'goku');
+    //player.anchor.setTo(0.5,0.5);    
     socket= new WebSocket(`ws://${address}/game/`);
     create_handler();
 
 
-    player.frame = 5;
-    player.animations.add('test',[6,7,8,9,10,11],10,true);
-    player.animations.add('idle',[0,1,2,3,4,5],10,true);
+    // player.frame = 5;
+    // player.animations.add('test',[6,7,8,9,10,11],10,true);
+    // player.animations.add('idle',[0,1,2,3,4,5],10,true);
     
     /*
     ibutton1 = this.add.button(this.world.centerX + 195, 100, 'button1', actionOnClick, this);
@@ -92,7 +97,7 @@ function create() {
     textTable.level_up = this.add.text(616, 16, 'Не хватает энергии для прорыва', {  font: 'Arkhip',fontSize: '16px', fill: 'red' });
     */
     
-    player.animations.play('test');
+    //player.animations.play('test');
     
 
     game.input.keyboard.addKeyCapture([
@@ -134,6 +139,7 @@ function update() {
     }
     
 }
+
 function create_handler(){
     socket.onmessage = (event)=>{
         let mes = decodeURIComponent(event.data).split(';');console.log(mes);
@@ -142,8 +148,9 @@ function create_handler(){
             case 'another move':another_move(mes[1].split(','));break;
             case 'all players':create_current_players(mes[1].split(','));break;
             case 'remove player':remove_player(mes[1]);break;
+            case 'player':create_player(mes[1]);
             //case 'move':mes[1]!='err'?console.log(`server: ${mes[1]}`):console.log('move err');
-            //////
+            /*
             case 'player':player = JSON.parse(mes[1]);need_update = true;break;
             case 'store_en': player.current_energy = parseFloat(mes[1]);need_update = true;break;
             case 'lvl_up': player = JSON.parse(mes[1]);need_update = true;break;
@@ -153,9 +160,28 @@ function create_handler(){
             case 'opp_turn':{let buf = JSON.parse(mes[1]);opp = buf;need_update = true;hide_damage_button(); break;}
             case 'win':player = JSON.parse(mes[1]);mode = 'idle';create_idle_screen(); need_update = true;break;
             case 'lose':player = JSON.parse(mes[1]);mode = 'idle';create_idle_screen();need_update = true;break;
+        */
         }
     };
 }
+
+function create_player(arg){
+    let sprite = '';
+    switch(arg){
+        case 'нормальный': sprite = 'cobra';
+                
+        case 'ученый': sprite = 'goku';
+        default:sprite = 'cobra';
+    }
+    player = this.add.sprite(200,200,sprite);
+    player.anchor.setTo(0.5,0.5);
+    player.frame = 5;
+    player.animations.add('test',[6,7,8,9,10,11],10,true);
+    player.animations.add('idle',[0,1,2,3,4,5],10,true);
+    player.animations.play('test');
+    
+}
+
 function create_current_players(args){
     if (args == '') return false;
     for (i of args){

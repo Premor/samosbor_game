@@ -21,6 +21,7 @@ function game() {
 			else{
 				client.user.type = res.characters[char];
 				this.send(`new player;${client.id};${client.user.type}`,null,[client.id]);
+				client.send(`player;${client.user.type}`)
 				for (i in this.connections){
 					if (i!=client.id){
 						list_online_id.push(i);
