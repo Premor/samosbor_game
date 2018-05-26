@@ -45,7 +45,9 @@ function create_char(){
 			if (err){
 				this.view('gavno');
 			}
-			else{
+			else{   
+				if (res.characters == undefined)
+					res.characters = [];
 				res.characters.push({type:type_u})
 				MODEL('user').char_m(login,res.characters,(err)=>{err?this.view('gavno'):this.session.user.type = type_u;this.view('congratulation');});
 				this.cookie('char',res.characters.length-1,'7 days');
