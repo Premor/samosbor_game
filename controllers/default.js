@@ -84,9 +84,10 @@ function logout(){
 
 function login(){
 	var self = this;
-	MODEL('user').login_u(this.body.login, this.body.psw, (err,res)=>{
-		if (err)
-			this.view('gavno', err);
+	MODEL('user').login_u(this.body.login, this.body.psw, (err,res)=>{	
+		if (err || !res){
+			console.log('new error');
+			this.view('gavno', err);}
 		else
 		{
 			this.cookie('player',self.body.login,'7 days');

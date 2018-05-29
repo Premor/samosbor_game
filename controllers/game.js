@@ -16,7 +16,8 @@ function game() {
 		let list_online_id=[];
 		let list_types = [];
 		MODEL('user').login_u(login,password,(err,res)=>{
-			if (err){
+				
+			if (err || !res){
 				this.send('gavno');
 			}
 			else{
@@ -74,11 +75,13 @@ function game() {
 		switch (mes[0]){
 			case 'move': 
 				if (mes[1]=='right'){
-					client.user.x +=client.user.speed;
+					if (MODEL('game').check_terrain(speed)){
+						client.user.x +=client.user.speed;}
 					
 				} 
 				else if (mes[1]=='left'){
-					client.user.x -=client.user.speed;
+					if (MODEL('game').check_terrain(-speed)){
+						client.user.x -=client.user.speed;}
 
 				}  
 				else {
@@ -87,6 +90,14 @@ function game() {
 				}
 				res = `${mes[0]};${client.user.x}`;
 				this.send(`another move;${client.id},${client.user.x}`,null,[client.id]);
+				break;
+			case 'move close':
+				if (Math.abs(mes[1])<client.user.speed){
+					if (MODEL('game').check_terrain(mes[1])){
+						client.user.x +=mes[1];}
+					this.send(`another move;${client.id},${client.user.x}`,null,[client.id]);
+					res = `move;${client.user.x}`;
+				}
 				break;
 		}
 		//console.log(`res: ${res}`);

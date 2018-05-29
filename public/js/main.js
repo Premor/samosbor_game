@@ -102,6 +102,7 @@ function create() {
         Phaser.Keyboard.DOWN,
         //Phaser.Keyboard.SPACEBAR
     ]);
+    game.input.mouse.capture = true;
 }
 function update() {
     if (load){
@@ -111,28 +112,53 @@ function update() {
             a.player.x = a.move_x;
             a.move_x = null; 
         }
+        }
+        if (game.input.activePointer.leftButton.isDown){
+            //console.log('click');
+            moveMouseDown();
+             
+        }
+        if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
+        {
+            //if (player.animations.currentAnim.name != 'test'){
+            //    player.animations.play('test');
+            //}
+            player.x -= speed;
+            socket.send('move;left');
+        }
+        else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
+        {
+            //if (player.animations.currentAnim.name != 'test'){
+            //    player.animations.play('test');
+            //}
+            player.x += speed;
+            socket.send('move;right');
+        }
+        else{
+            //if (player.animations.currentAnim.name != 'idle'){
+            //    player.animations.play('idle');
+            //}
+        }
     }
-    if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
-    {
-        //if (player.animations.currentAnim.name != 'test'){
-        //    player.animations.play('test');
-        //}
-        player.x -= speed;
-        socket.send('move;left');
-    }
-    else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
-    {
-        //if (player.animations.currentAnim.name != 'test'){
-        //    player.animations.play('test');
-        //}
-        player.x += speed;
-        socket.send('move;right');
-    }
+}
+
+function moveMouseDown(){
+    const delta = game.input.x-player.x; 
+    const mod_delta = Math.abs(delta);
+    if (mod_delta>=speed){
+        if (delta>=0){
+            player.x +=speed;
+            socket.send('move;right');
+        }
+        else {
+            player.x -=speed;
+            socket.send('move;left');
+        }
+    }   
     else{
-        //if (player.animations.currentAnim.name != 'idle'){
-        //    player.animations.play('idle');
-        //}
-    }
+        player.x +=delta;
+        socket.send(`move close;${delta}`);
+
     }
 }
 
