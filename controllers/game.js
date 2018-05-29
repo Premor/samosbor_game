@@ -4,7 +4,19 @@ exports.install = function() {
 	F.global.users_map = {};
 	F.global.users_id = {};
 	F.global.fighters = [];
+	MODEL('game').load_tree_progress((err,res)=>{
+		if (!err || res) {F.global.tree_progress = res.tree;console.log('load tree: ',res.tree)}
+		else F.global.tree_progress = {};
+	});
+	
 };
+
+setInterval(()=>{
+	MODEL('game').save_tree_progress(F.global.tree_progress,(err)=>{
+		if (err) console.log('Cant save tree in DB: ',err);
+		else console.log('Save tree in DB');
+	});
+},60000);
 
 function game() {
 	//const self = this;
@@ -73,15 +85,21 @@ function game() {
 		const mes = message.split(';');
 		//console.log(`mes: 	${mes}`)
 		switch (mes[0]){
-			case 'move': 
+			case 'move':{ 
 				if (mes[1]=='right'){
-					if (MODEL('game').check_terrain(speed)){
-						client.user.x +=client.user.speed;}
+					if (MODEL('game').check_terrain(client.user.speed)){
+						client.user.x +=client.user.speed;
+						if (!MODEL('game').check_science_zone(client.user.x) && client.user.research){
+							clearInterval(client.user.research);
+							client.user.research = null;}}
 					
 				} 
 				else if (mes[1]=='left'){
-					if (MODEL('game').check_terrain(-speed)){
-						client.user.x -=client.user.speed;}
+					if (MODEL('game').check_terrain(-client.user.speed)){
+						client.user.x -=client.user.speed;
+						if (MODEL('game').check_science_zone(client.user.x)&&client.user.research){
+							clearInterval(client.user.research);
+							client.user.research = null;}}
 
 				}  
 				else {
@@ -90,15 +108,26 @@ function game() {
 				}
 				res = `${mes[0]};${client.user.x}`;
 				this.send(`another move;${client.id},${client.user.x}`,null,[client.id]);
-				break;
-			case 'move close':
-				if (Math.abs(mes[1])<client.user.speed){
-					if (MODEL('game').check_terrain(mes[1])){
-						client.user.x +=mes[1];}
+				break;}
+			case 'move close':{
+				const int_arg = parseInt(mes[1]);
+				if (Math.abs(int_arg)<client.user.speed){
+					if (MODEL('game').check_terrain(int_arg)){
+						client.user.x +=int_arg;
+						if (MODEL('game').check_science_zone(client.user.x) && client.user.research){
+							clearInterval(client.user.research);
+							client.user.research = null;}}
 					this.send(`another move;${client.id},${client.user.x}`,null,[client.id]);
 					res = `move;${client.user.x}`;
 				}
-				break;
+				break;}
+			case 'research':{
+				if (!client.user.research){
+					if (MODEL('game').check_science_zone(client.user.x)) {
+						client.user.research = setInterval(()=>{F.global.tree_progress.current+=1;console.log('added')},1000)}
+					res = `${mes[0]};${F.global.tree_progress.current}`
+				}
+				break;}
 		}
 		//console.log(`res: ${res}`);
 		client.send(res);

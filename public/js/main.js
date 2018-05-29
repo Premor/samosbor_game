@@ -139,11 +139,16 @@ function update() {
             //    player.animations.play('idle');
             //}
         }
+        if (player.x>=100 && player.x<200&&player.type=='ученый'){
+            socket.send('research')
+        }
     }
 }
 
 function moveMouseDown(){
     const delta = game.input.x-player.x; 
+    console.log('mouse x: ',game.input.x);
+    console.log('delta: ',delta);
     const mod_delta = Math.abs(delta);
     if (mod_delta>=speed){
         if (delta>=0){
@@ -197,6 +202,7 @@ function create_player(type){
     }
     player = game.add.sprite(200,200,sprite);
     player.anchor.setTo(0.5,0.5);
+    player.type = type;
     switch(sprite){
         case 'cobra':break;
                 
